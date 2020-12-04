@@ -42,17 +42,20 @@ app.post('/user',(req, res) => {
 app.get('/user', (req, res) => {
     client.query('SELECT * FROM users',
     (error, results) => {
-        res.render(pathString + 'index.ejs', {user_info: results})
+        res.render(pathString + 'users.ejs', {user_info: results})
         console.log(results)
     })
-    
 })
 
 
 // 質問関連
 // 質問取得
-app.get('/question/new', (req, res) => {
-    res.render(pathString + 'question_new.ejs')
+app.get('/question', (req, res) => {
+    client.query('SELECT * FROM questions', 
+    (error, results) =>  {
+        res.render(pathString + "questions.ejs", {question_info: results})
+        console.log(results)
+    })
 })
 
 // 質問作成
