@@ -37,12 +37,25 @@ app.post('/user',(req, res) => {
     res.render(pathString + 'index.ejs');
 
     })
-     
+
+// ユーザー取得
+app.get('/user', (req, res) => {
+    client.query('SELECT * FROM users',
+    (error, results) => {
+        res.render(pathString + 'index.ejs', {user_info: results})
+        console.log(results)
+    })
+    
+})
+
+
 // 質問関連
+// 質問取得
 app.get('/question/new', (req, res) => {
     res.render(pathString + 'question_new.ejs')
 })
 
+// 質問作成
 app.post('/questionap/', (req, res) => {
 
     const {user_id,deadline_date} = req.body
@@ -63,6 +76,19 @@ app.post('/questionap/', (req, res) => {
 })
 
 
+// 回答関連
+// 回答作成
+app.post('/answer', (req, res) => {
+    const answer_uuid = uuidv4()
+    const image_uuid = uuidv4()
+    const{user_id, question_id, text:answer_detail, image:image_url} = req.body
+    // console.log(req.body)
+    client.query('INSERT INTO answers (id, question_id, user_id, answer_detail, is_best_answer, created_date, updated_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+        [answer_uuid, question_id, user_id, answer_detail, false, today, today])
+    client.query('INSERT INTO image (id, relation_id, image_url, created_date, updated_date) VALUES ($1, $2, $3, $4, $5)', 
+        [image_uuid, answer_uuid, image_url, today, today])
+    res.render(pathString + 'index.ejs');
+})
 
 
 app.listen(port);
