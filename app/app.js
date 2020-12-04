@@ -25,41 +25,44 @@ var client = new Client({
 client.connect()
 
 
+// ユーザー関連
+// ユーザー作成
+app.post('/user',(req, res) => {
 
-app.get('/api', (req, res) => {
-    res.render(pathString + 'index.ejs')
-}) 
+    const user_uuid = uuidv4()
+    const image_uuid = uuidv4()
+    const {user_id : firebase_user_id,  user_name, user_image : image_url} = req.body
+    client.query('INSERT INTO users (id, firebase_user_id, user_name, self_introduction, created_date, updated_date) VALUES ($1, $2,$3,$4,$5,$6)', [user_uuid, firebase_user_id, user_name, null, today, today])
+    client.query('INSERT INTO image(id, relation_id, image_url, created_date, updated_date) VALUES ($1, $2, $3, $4, $5)', [image_uuid, firebase_user_id, image_url, today, today])
+    res.render(pathString + 'index.ejs');
 
+    })
+     
 // 質問関連
 app.get('/question/new', (req, res) => {
     res.render(pathString + 'question_new.ejs')
 })
 
-app.post('/question/', (req, res) => {
-    // console.log(req.body)
-    // console.log(req.body.image)
+app.post('/questionap/', (req, res) => {
+
     const {user_id,deadline_date} = req.body
-    console.log(req.body)
     const {text : question_detail} = req.body
     const {category : question_category} = req.body
     const question_uuid = uuidv4(); 
-    
     const {image_list : image_url} = req.body
-    console.log(req.body)
 
     client.query('INSERT INTO questions (id, user_id, question_detail, question_category,deadline_date, is_closed, created_date, updated_date) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
         [question_uuid, user_id, question_detail, question_category,deadline_date, false, today, today])
-    
-    
 
-        // console.log("あああああああああああ" + image_url.length)
     image_url.forEach(image =>{
         const image_uuid = uuidv4()
-        client.query("INSERT INTO  image (id, relation_id, question_image_url, created_date, updated_date) VALUES ($1,$2,$3,$4,$5)", 
-            [image_uuid, question_uuid,image , today, today])}
-    )
+        client.query("INSERT INTO  image (id, relation_id, image_url, created_date, updated_date) VALUES ($1,$2,$3,$4,$5)", 
+            [image_uuid, question_uuid,image , today, today])})
+
     res.render(pathString + 'index.ejs');
 })
+
+
 
 
 app.listen(port);
