@@ -9,6 +9,7 @@ var bodyParser = require('body-parser');
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 var port = process.env.PORT || 3000; 
 
@@ -25,40 +26,11 @@ var client = new Client({
 client.connect()
 
 
-// ユーザー関連
-// ユーザー作成
-app.post('/user',(req, res) => {
 
-    const user_uuid = uuidv4()
-    const image_uuid = uuidv4()
-    const {user_id : firebase_user_id,  user_name, user_image : image_url} = req.body
-    client.query('INSERT INTO users (id, firebase_user_id, user_name, self_introduction, created_date, updated_date) VALUES ($1, $2,$3,$4,$5,$6)', [user_uuid, firebase_user_id, user_name, null, today, today])
-    client.query('INSERT INTO image(id, relation_id, image_url, created_date, updated_date) VALUES ($1, $2, $3, $4, $5)', [image_uuid, firebase_user_id, image_url, today, today])
-    res.render(pathString + 'index.ejs');
-
-    })
-
-// ユーザー取得
-app.get('/user', (req, res) => {
-    client.query('SELECT * FROM users',
-    (error, results) => {
-        res.render(pathString + 'users.ejs', {user_info: results})
-        console.log(results)
-    })
-})
 
 
 // 質問関連
-// 質問取得
-app.get('/question', (req, res) => {
-    client.query('SELECT * FROM questions', 
-    (error, results) =>  {
-        res.render(pathString + "questions.ejs", {question_info: results})
-        console.log(results)
-    })
-})
-
-// 質問作成
+// 質問作成　OK
 app.post('/questionap/', (req, res) => {
 
     const {user_id,deadline_date} = req.body
@@ -78,9 +50,19 @@ app.post('/questionap/', (req, res) => {
     res.render(pathString + 'index.ejs');
 })
 
+// 質問一覧取得 OK  質問詳細取得:ダメ
+app.get('/question', (req, res) => {
+    client.query('SELECT * FROM questions', 
+    (error, results) =>  {
+        res.render(pathString + "questions.ejs", {question_info: results})
+        console.log(results)
+    })
+})
+
+
 
 // 回答関連
-// 回答作成
+// 回答作成 OK
 app.post('/answer', (req, res) => {
     const answer_uuid = uuidv4()
     const image_uuid = uuidv4()
@@ -92,6 +74,56 @@ app.post('/answer', (req, res) => {
         [image_uuid, answer_uuid, image_url, today, today])
     res.render(pathString + 'index.ejs');
 })
+
+
+
+
+
+// ユーザー関連
+// ユーザー作成 OK
+app.post('/user',(req, res) => {
+    console.log(req.params)
+    const user_uuid = uuidv4()
+    const image_uuid = uuidv4()
+    const {user_id : firebase_user_id,  user_name, user_image : image_url} = req.body
+    client.query('INSERT INTO users (id, firebase_user_id, user_name, self_introduction, created_date, updated_date) VALUES ($1, $2,$3,$4,$5,$6)', [user_uuid, firebase_user_id, user_name, null, today, today])
+    client.query('INSERT INTO image(id, relation_id, image_url, created_date, updated_date) VALUES ($1, $2, $3, $4, $5)', [image_uuid, firebase_user_id, image_url, today, today])
+    res.render(pathString + 'users.ejs');
+
+    })
+
+// ユーザー取得 OK
+app.get('/user', (req, res) => {
+    client.query('SELECT * FROM users',
+    (error, results) => {
+        res.render(pathString + 'users.ejs', {user_info: results})
+        console.log(results)
+    })
+})
+
+// ユーザー更新
+
+
+
+// ユーザー削除
+app.delete("/user/", (req, res) => {
+    const {user_id : id} = req.body
+    // console.log(req.params.id)
+    // console.log(`DELETE FROM users WHERE id = ${id}`)
+    client.query(`DELETE FROM users WHERE id = '${id}'`,
+    (error, result) => {
+        res.render(pathString + 'index.ejs')
+    })
+
+})
+
+
+
+
+
+
+
+
 
 
 app.listen(port);
