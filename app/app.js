@@ -31,7 +31,7 @@ client.connect()
 
 // 質問関連
 // 質問作成　OK
-app.post('/questionap/', (req, res) => {
+app.post('/question/', (req, res) => {
 
     const {user_id,deadline_date} = req.body
     const {text : question_detail} = req.body
@@ -87,7 +87,7 @@ app.post('/user',(req, res) => {
     const image_uuid = uuidv4()
     const {user_id : firebase_user_id,  user_name, user_image : image_url} = req.body
     client.query('INSERT INTO users (id, firebase_user_id, user_name, self_introduction, created_date, updated_date) VALUES ($1, $2,$3,$4,$5,$6)', [user_uuid, firebase_user_id, user_name, null, today, today])
-    client.query('INSERT INTO image(id, relation_id, image_url, created_date, updated_date) VALUES ($1, $2, $3, $4, $5)', [image_uuid, firebase_user_id, image_url, today, today])
+    client.query('INSERT INTO image(id, relation_id, image_url, created_date, updated_date) VALUES ($1, $2, $3, $4, $5)', [image_uuid, user_uuid, image_url, today, today])
     res.render(pathString + 'users.ejs');
 
     })
@@ -97,16 +97,23 @@ app.get('/user', (req, res) => {
     client.query('SELECT * FROM users',
     (error, results) => {
         res.render(pathString + 'users.ejs', {user_info: results})
-        console.log(results)
+        // console.log(results)
     })
 })
 
 // ユーザー更新
+app.put("/user", (req, res) => {
+    const {user_id:id, user_name, user_image: image_url} = req.body
+    client.query(`UPDATE users SET user_name ='${user_name}' WHERE id = '${id}'`)
+    client.query(`UPDATE image SET image_url = '${image_url}'  WHERE relation_id = '${id}'`)
 
+     res.render(pathString + 'index.ejs')
+
+})
 
 
 // ユーザー削除
-app.delete("/user/", (req, res) => {
+app.delete("/user", (req, res) => {
     const {user_id : id} = req.body
     // console.log(req.params.id)
     // console.log(`DELETE FROM users WHERE id = ${id}`)
