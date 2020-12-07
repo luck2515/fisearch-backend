@@ -75,14 +75,20 @@ app.post('/answer', (req, res) => {
     res.render(pathString + 'index.ejs');
 })
 
-
-
-
+// ベストアンサー
+app.put('/answer/bestanswer', (req, res) =>{
+    // console.log(req.body)
+    
+    const {question_id, answer_id} = req.body
+    client.query(`UPDATE answers SET is_best_answer = TRUE WHERE id = '${answer_id}'`)
+    client.query(`UPDATE questions SET is_closed = TRUE WHERE id ='${question_id}'`) 
+    res.render(pathString + 'index.ejs');
+})
 
 // ユーザー関連
 // ユーザー作成 OK
 app.post('/user',(req, res) => {
-    console.log(req.params)
+    // console.log(req.params)
     const user_uuid = uuidv4()
     const image_uuid = uuidv4()
     const {user_id : firebase_user_id,  user_name, user_image : image_url} = req.body
@@ -101,7 +107,7 @@ app.get('/user', (req, res) => {
     })
 })
 
-// ユーザー更新
+// ユーザー更新 OK 
 app.put("/user", (req, res) => {
     const {user_id:id, user_name, user_image: image_url} = req.body
     client.query(`UPDATE users SET user_name ='${user_name}' WHERE id = '${id}'`)
@@ -112,7 +118,7 @@ app.put("/user", (req, res) => {
 })
 
 
-// ユーザー削除
+// ユーザー削除 OK
 app.delete("/user", (req, res) => {
     const {user_id : id} = req.body
     // console.log(req.params.id)
@@ -123,12 +129,6 @@ app.delete("/user", (req, res) => {
     })
 
 })
-
-
-
-
-
-
 
 
 
