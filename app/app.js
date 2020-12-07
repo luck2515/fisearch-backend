@@ -17,6 +17,7 @@ app.use(express.urlencoded({extended: false}))
 
 var { Client } = require('pg');
 const { ENETUNREACH } = require('constants');
+const { ok } = require('assert');
 var client = new Client({
     user: 'postgres',
     host: 'localhost',
@@ -50,15 +51,23 @@ app.post('/question/', (req, res) => {
     res.render(pathString + 'index.ejs');
 })
 
-// 質問一覧取得 OK  質問詳細取得:ダメ
+// 質問一覧取得 OK  
 app.get('/question', (req, res) => {
     client.query('SELECT * FROM questions', 
     (error, results) =>  {
-        res.render(pathString + "questions.ejs", {question_info: results})
+        res.render(pathString + "questions.ejs", {question_infos: results})
         console.log(results)
     })
 })
 
+// 質問詳細取得:OK
+app.get('/question/:id', (req, res) => {
+    client.query(`SELECT * FROM questions WHERE id = '${req.params.id}'`,
+    (error, results) => {   
+        res.render(pathString + "detail.ejs", {question_detail: results})
+        console.log(results)
+    })
+})
 
 
 // 回答関連
